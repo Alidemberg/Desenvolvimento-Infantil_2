@@ -7,9 +7,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-  <!-- Bibliotecas para PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.32/jspdf.plugin.autotable.min.js"></script>
+  <!-- Bibliotecas para PDF (URLs estáveis) -->
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,19 +56,23 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Verifica se as bibliotecas carregaram
+      if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
+        console.error('Bibliotecas não carregaram. Verifique a conexão.');
+        return;
+      }
+
       const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
-      let cabecalhoGlobal = []; // Armazena os cabeçalhos para o PDF
-      let tabela; // Referência ao DataTable
+      let cabecalhoGlobal = [];
+      let tabela;
 
       Papa.parse(csvUrl, {
         download: true,
         skipEmptyLines: true,
         complete: function(results) {
-          // Pega a linha 5 como cabeçalho (índice 4, já que começa em 0)
-          cabecalhoGlobal = results.data[4].slice(1, 13); // Colunas B a M (índices 1 a 12)
-          let dados = results.data.slice(5); // Dados a partir da linha 6
+          cabecalhoGlobal = results.data[4].slice(1, 13);
+          let dados = results.data.slice(5);
 
-          // Preenche o cabeçalho da tabela
           let cabecalhoRow = document.getElementById("cabecalho");
           cabecalhoGlobal.forEach(col => {
             let th = document.createElement("th");
@@ -76,33 +80,21 @@
             cabecalhoRow.appendChild(th);
           });
 
-          // Preenche o corpo da tabela com dados das colunas B a M
           let tbody = document.querySelector("#tabela tbody");
           dados.forEach(row => {
-            if (row.length > 12) { // Verifica se tem pelo menos 13 colunas
+            if (row.length > 12) {
               let tr = document.createElement("tr");
               tr.innerHTML = `
-                <td>${row[1] || ''}</td>
-                <td>${row[2] || ''}</td>
-                <td>${row[3] || ''}</td>
-                <td>${row[4] || ''}</td>
-                <td>${row[5] || ''}</td>
-                <td>${row[6] || ''}</td>
-                <td>${row[7] || ''}</td>
-                <td>${row[8] || ''}</td>
-                <td>${row[9] || ''}</td>
-                <td>${row[10] || ''}</td>
-                <td>${row[11] || ''}</td>
-                <td>${row[12] || ''}</td>
+                <td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td><td>${row[4] || ''}</td>
+                <td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td><td>${row[8] || ''}</td>
+                <td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td><td>${row[12] || ''}</td>
               `;
               tbody.appendChild(tr);
             }
           });
 
-          // Inicializa o DataTable
           tabela = $('#tabela').DataTable();
 
-          // Filtro de equipes (assumindo que a coluna B é a equipe)
           let equipes = [...new Set(dados.map(r => r[1]))].sort();
           let filtro = document.getElementById("filtroEquipe");
           equipes.forEach(eq => {
@@ -118,23 +110,23 @@
             tabela.column(0).search(this.value).draw();
           });
 
-          // Evento para gerar PDF com filtro aplicado
+          // Evento para PDF
           document.getElementById("btnPdf").addEventListener("click", function() {
+            if (typeof window.jspdf === 'undefined') {
+              alert('Biblioteca PDF não carregou. Verifique o console.');
+              return;
+            }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
-            // Título
             doc.text("Desenvolvimento Infantil", 14, 20);
 
-            // Pega os dados filtrados da tabela atual
-            let rows = tabela.rows({ search: 'applied' }).data().toArray(); // Dados visíveis após filtro
+            let rows = tabela.rows({ search: 'applied' }).data().toArray();
             let bodyPDF = rows.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '',
               row[4] || '', row[5] || '', row[6] || '', row[7] || '',
               row[8] || '', row[9] || '', row[10] || '', row[11] || ''
             ]);
 
-            // Gera a tabela no PDF
             doc.autoTable({
               head: [cabecalhoGlobal],
               body: bodyPDF,
@@ -144,7 +136,6 @@
               headStyles: { fillColor: [41, 128, 185] }
             });
 
-            // Salva o PDF com a equipe filtrada no nome (se houver)
             let filtroValue = filtro.value || 'todas_equipes';
             doc.save(`desenvolvimento-infantil-${filtroValue}.pdf`);
           });

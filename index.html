@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Desenvolvimento Infantil</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    #filtroEquipe {
+      margin-bottom: 15px;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      border: 1px solid white;
+    }
+  </style>
+</head>
+<body>
+  <h2>Desenvolvimento Infantil</h2>
+  <label for="filtroEquipe">Filtrar por Equipe: </label>
+  <select id="filtroEquipe">
+    <option value="">Todas</option>
+  </select>
+  <table id="tabela" class="display" style="width:100%">
+    <thead>
+      <tr id="cabecalho"></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
+      Papa.parse(csvUrl, {
+        download: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          // Pega a linha 5 como cabeçalho (índice 4, já que começa em 0)
+          let cabecalho = results.data[4].slice(1, 13); // Colunas B a M (índices 1 a 12)
+          let dados = results.data.slice(5); // Dados a partir da linha 6
+
+          // Preenche o cabeçalho da tabela
+          let cabecalhoRow = document.getElementById("cabecalho");
+          cabecalho.forEach(col => {
+            let th = document.createElement("th");
+            th.textContent = col || 'Sem Nome';
+            cabecalhoRow.appendChild(th);
+          });
+
+          // Preenche o corpo da tabela com dados das colunas B a M
+          let tbody = document.querySelector("#tabela tbody");
+          dados.forEach(row => {
+            if (row.length > 12) { // Verifica se tem pelo menos 13 colunas
+              let tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${row[1] || ''}</td>
+                <td>${row[2] || ''}</td>
+                <td>${row[3] || ''}</td>
+                <td>${row[4] || ''}</td>
+                <td>${row[5] || ''}</td>
+                <td>${row[6] || ''}</td>
+                <td>${row[7] || ''}</td>
+                <td>${row[8] || ''}</td>
+                <td>${row[9] || ''}</td>
+                <td>${row[10] || ''}</td>
+                <td>${row[11] || ''}</td>
+                <td>${row[12] || ''}</td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+
+          // Inicializa o DataTable
+          let tabela = $('#tabela').DataTable();
+
+          // Filtro de equipes (assumindo que a coluna B é a equipe)
+          let equipes = [...new Set(dados.map(r => r[1]))].sort();
+          let filtro = document.getElementById("filtroEquipe");
+          equipes.forEach(eq => {
+            if (eq && eq.trim() !== "") {
+              let opt = document.createElement("option");
+              opt.value = eq;
+              opt.textContent = eq;
+              filtro.appendChild(opt);
+            }
+          });
+
+          filtro.addEventListener("change", function() {
+            tabela.column(0).search(this.value).draw();
+          });
+        },
+        error: function(err) {
+          console.error("Erro ao carregar o CSV:", err);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

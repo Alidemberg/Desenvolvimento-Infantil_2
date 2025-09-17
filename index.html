@@ -7,9 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-  <!-- Bibliotecas para PDF com fallback local -->
-  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/jspdf-autotable@3.5.32/dist/jspdf.plugin.autotable.min.js"></script>
+  <!-- Bibliotecas para PDF hospedadas localmente -->
   <script src="/jspdf.umd.min.js"></script>
   <script src="/jspdf.plugin.autotable.min.js"></script>
   <style>
@@ -178,7 +176,7 @@
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
+              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique os arquivos.';
               document.getElementById('erroPdf').style.display = 'block';
               return;
             }
@@ -269,7 +267,7 @@
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
+              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique os arquivos.';
               document.getElementById('erroPdf2').style.display = 'block';
               return;
             }
@@ -315,4 +313,3 @@
   </script>
 </body>
 </html>
-

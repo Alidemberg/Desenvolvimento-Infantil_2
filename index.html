@@ -7,7 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-  <!-- Bibliotecas para PDF com fallback -->
+  <!-- Bibliotecas para PDF -->
   <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://unpkg.com/jspdf-autotable@3.5.32/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
@@ -18,7 +18,34 @@
     h2 {
       text-align: center;
     }
-    #filtroEquipe {
+    .tab-buttons {
+      margin-bottom: 15px;
+    }
+    .tab-button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .tab-button:hover {
+      background-color: #0056b3;
+    }
+    .tab-button.active {
+      background-color: #0056b3;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 0 4px 4px 4px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    #filtroEquipe, #filtroEquipe2 {
       margin-bottom: 15px;
       padding: 5px;
     }
@@ -38,7 +65,7 @@
     button:hover {
       background-color: #0056b3;
     }
-    #erroPdf {
+    #erroPdf, #erroPdf2 {
       color: red;
       margin-top: 10px;
       display: none;
@@ -47,48 +74,78 @@
 </head>
 <body>
   <h2>Desenvolvimento Infantil</h2>
-  <label for="filtroEquipe">Filtrar por Equipe: </label>
-  <select id="filtroEquipe">
-    <option value="">Todas</option>
-  </select>
-  <button id="btnPdf">Gerar PDF</button>
-  <div id="erroPdf"></div>
-  <table id="tabela" class="display" style="width:100%">
-    <thead>
-      <tr id="cabecalho"></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="tab-buttons">
+    <button class="tab-button active" onclick="openTab('tab1')">Tabela 1</button>
+    <button class="tab-button" onclick="openTab('tab2')">Tabela 2</button>
+  </div>
+
+  <!-- Aba 1 -->
+  <div id="tab1" class="tab-content active">
+    <label for="filtroEquipe">Filtrar por Equipe: </label>
+    <select id="filtroEquipe">
+      <option value="">Todas</option>
+    </select>
+    <button id="btnPdf1">Gerar PDF</button>
+    <div id="erroPdf"></div>
+    <table id="tabela1" class="display" style="width:100%">
+      <thead>
+        <tr id="cabecalho1"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Aba 2 -->
+  <div id="tab2" class="tab-content">
+    <label for="filtroEquipe2">Filtrar por Equipe: </label>
+    <select id="filtroEquipe2">
+      <option value="">Todas</option>
+    </select>
+    <button id="btnPdf2">Gerar PDF</button>
+    <div id="erroPdf2"></div>
+    <table id="tabela2" class="display" style="width:100%">
+      <thead>
+        <tr id="cabecalho2"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
-      let cabecalhoGlobal = [];
-      let tabela;
+    function openTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`[onclick="openTab('${tabId}')"]`).classList.add('active');
+    }
 
-      // Verifica se as bibliotecas essenciais estão carregadas
+    document.addEventListener('DOMContentLoaded', function() {
+      const csvUrl1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
+      const csvUrl2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1899832726&single=true&output=csv";
+
+      // Tabela 1
       if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
         document.getElementById('erroPdf').innerText = 'Erro: Bibliotecas básicas não carregaram.';
         document.getElementById('erroPdf').style.display = 'block';
         return;
       }
 
-      Papa.parse(csvUrl, {
+      Papa.parse(csvUrl1, {
         download: true,
         skipEmptyLines: true,
         complete: function(results) {
-          cabecalhoGlobal = results.data[4].slice(1, 13);
-          let dados = results.data.slice(5);
+          let cabecalhoGlobal1 = results.data[4].slice(1, 13); // Colunas B a M
+          let dados1 = results.data.slice(5);
 
-          let cabecalhoRow = document.getElementById("cabecalho");
-          cabecalhoGlobal.forEach(col => {
+          let cabecalhoRow1 = document.getElementById("cabecalho1");
+          cabecalhoGlobal1.forEach(col => {
             let th = document.createElement("th");
             th.textContent = col || 'Sem Nome';
-            cabecalhoRow.appendChild(th);
+            cabecalhoRow1.appendChild(th);
           });
 
-          let tbody = document.querySelector("#tabela tbody");
-          dados.forEach(row => {
+          let tbody1 = document.querySelector("#tabela1 tbody");
+          dados1.forEach(row => {
             if (row.length > 12) {
               let tr = document.createElement("tr");
               tr.innerHTML = `
@@ -96,71 +153,162 @@
                 <td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td><td>${row[8] || ''}</td>
                 <td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td><td>${row[12] || ''}</td>
               `;
-              tbody.appendChild(tr);
+              tbody1.appendChild(tr);
             }
           });
 
-          tabela = $('#tabela').DataTable();
+          let tabela1 = $('#tabela1').DataTable();
 
-          let equipes = [...new Set(dados.map(r => r[1]))].sort();
-          let filtro = document.getElementById("filtroEquipe");
-          equipes.forEach(eq => {
+          let equipes1 = [...new Set(dados1.map(r => r[1]))].sort();
+          let filtro1 = document.getElementById("filtroEquipe");
+          equipes1.forEach(eq => {
             if (eq && eq.trim() !== "") {
               let opt = document.createElement("option");
               opt.value = eq;
               opt.textContent = eq;
-              filtro.appendChild(opt);
+              filtro1.appendChild(opt);
             }
           });
 
-          filtro.addEventListener("change", function() {
-            tabela.column(0).search(this.value).draw();
+          filtro1.addEventListener("change", function() {
+            tabela1.column(0).search(this.value).draw();
           });
 
-          // Evento para gerar PDF em paisagem
-          document.getElementById("btnPdf").addEventListener("click", function() {
+          document.getElementById("btnPdf1").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
+              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou.';
               document.getElementById('erroPdf').style.display = 'block';
               return;
             }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
-              orientation: 'landscape', // Define como paisagem
+              orientation: 'landscape',
               unit: 'mm',
               format: 'a4'
             });
 
-            doc.text("Desenvolvimento Infantil", 14, 20);
+            doc.text("Desenvolvimento Infantil - Tabela 1", 14, 20);
 
-            let rows = tabela.rows({ search: 'applied' }).data().toArray();
-            let bodyPDF = rows.map(row => [
+            let rows1 = tabela1.rows({ search: 'applied' }).data().toArray();
+            let bodyPDF1 = rows1.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '',
               row[4] || '', row[5] || '', row[6] || '', row[7] || '',
               row[8] || '', row[9] || '', row[10] || '', row[11] || ''
             ]);
 
-            if (bodyPDF.length === 0) {
-              document.getElementById('erroPdf').innerText = 'Erro: Nenhum dado para gerar o PDF. Aplique um filtro ou verifique os dados.';
+            if (bodyPDF1.length === 0) {
+              document.getElementById('erroPdf').innerText = 'Erro: Nenhum dado para gerar o PDF.';
               document.getElementById('erroPdf').style.display = 'block';
               return;
             }
 
             doc.autoTable({
-              head: [cabecalhoGlobal],
-              body: bodyPDF,
+              head: [cabecalhoGlobal1],
+              body: bodyPDF1,
               startY: 30,
               theme: 'striped',
               styles: { fontSize: 8 },
               headStyles: { fillColor: [41, 128, 185] }
             });
 
-            let filtroValue = document.getElementById('filtroEquipe').value || 'todas_equipes';
-            doc.save(`desenvolvimento-infantil-${filtroValue}.pdf`);
+            let filtroValue1 = filtro1.value || 'todas_equipes';
+            doc.save(`desenvolvimento-infantil-tabela1-${filtroValue1}.pdf`);
           });
         },
         error: function(err) {
-          console.error("Erro ao carregar o CSV:", err);
+          console.error("Erro ao carregar o CSV da Tabela 1:", err);
+        }
+      });
+
+      // Tabela 2
+      Papa.parse(csvUrl2, {
+        download: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          let cabecalhoGlobal2 = results.data[4].slice(1, 14); // Colunas B a N
+          let dados2 = results.data.slice(5);
+
+          let cabecalhoRow2 = document.getElementById("cabecalho2");
+          cabecalhoGlobal2.forEach(col => {
+            let th = document.createElement("th");
+            th.textContent = col || 'Sem Nome';
+            cabecalhoRow2.appendChild(th);
+          });
+
+          let tbody2 = document.querySelector("#tabela2 tbody");
+          dados2.forEach(row => {
+            if (row.length > 13) {
+              let tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td><td>${row[4] || ''}</td>
+                <td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td><td>${row[8] || ''}</td>
+                <td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td><td>${row[12] || ''}</td>
+                <td>${row[13] || ''}</td>
+              `;
+              tbody2.appendChild(tr);
+            }
+          });
+
+          let tabela2 = $('#tabela2').DataTable();
+
+          let equipes2 = [...new Set(dados2.map(r => r[1]))].sort();
+          let filtro2 = document.getElementById("filtroEquipe2");
+          equipes2.forEach(eq => {
+            if (eq && eq.trim() !== "") {
+              let opt = document.createElement("option");
+              opt.value = eq;
+              opt.textContent = eq;
+              filtro2.appendChild(opt);
+            }
+          });
+
+          filtro2.addEventListener("change", function() {
+            tabela2.column(0).search(this.value).draw();
+          });
+
+          document.getElementById("btnPdf2").addEventListener("click", function() {
+            if (typeof window.jspdf === 'undefined') {
+              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou.';
+              document.getElementById('erroPdf2').style.display = 'block';
+              return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+              orientation: 'landscape',
+              unit: 'mm',
+              format: 'a4'
+            });
+
+            doc.text("Desenvolvimento Infantil - Tabela 2", 14, 20);
+
+            let rows2 = tabela2.rows({ search: 'applied' }).data().toArray();
+            let bodyPDF2 = rows2.map(row => [
+              row[0] || '', row[1] || '', row[2] || '', row[3] || '',
+              row[4] || '', row[5] || '', row[6] || '', row[7] || '',
+              row[8] || '', row[9] || '', row[10] || '', row[11] || '', row[12] || ''
+            ]);
+
+            if (bodyPDF2.length === 0) {
+              document.getElementById('erroPdf2').innerText = 'Erro: Nenhum dado para gerar o PDF.';
+              document.getElementById('erroPdf2').style.display = 'block';
+              return;
+            }
+
+            doc.autoTable({
+              head: [cabecalhoGlobal2],
+              body: bodyPDF2,
+              startY: 30,
+              theme: 'striped',
+              styles: { fontSize: 8 },
+              headStyles: { fillColor: [41, 128, 185] }
+            });
+
+            let filtroValue2 = filtro2.value || 'todas_equipes';
+            doc.save(`desenvolvimento-infantil-tabela2-${filtroValue2}.pdf`);
+          });
+        },
+        error: function(err) {
+          console.error("Erro ao carregar o CSV da Tabela 2:", err);
         }
       });
     });

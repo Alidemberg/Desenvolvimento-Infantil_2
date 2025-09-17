@@ -167,9 +167,11 @@
             }
           });
 
-          let tabela1 = $('#tabela1').DataTable();
+          let tabela1 = $('#tabela1').DataTable({
+            "pageLength": 10 // Adicionado para facilitar visualização
+          });
 
-          // Filtro por Equipe (coluna B, índice 1)
+          // Filtro por Equipe (coluna B, índice 1 no CSV, 0 na tabela exibida)
           let equipes1 = [...new Set(dados1.map(r => r[1]))].sort();
           let filtroEquipe1 = document.getElementById("filtroEquipe");
           equipes1.forEach(eq => {
@@ -181,7 +183,7 @@
             }
           });
 
-          // Filtro por Status (coluna O, índice 14)
+          // Filtro por Status (coluna O, índice 14 no CSV, 13 na tabela exibida)
           let statuses1 = [...new Set(dados1.map(r => r[14]))].sort();
           let filtroStatus1 = document.getElementById("filtroStatus1");
           statuses1.forEach(status => {
@@ -204,7 +206,10 @@
           function applyFilters1() {
             let equipeFilter = filtroEquipe1.value;
             let statusFilter = filtroStatus1.value;
-            tabela1.column(1).search(equipeFilter).column(14).search(statusFilter).draw(); // Usa coluna 1 (B) para equipe
+            console.log("Filtro Tabela 1 - Equipe:", equipeFilter, "Status:", statusFilter);
+            console.log("Dados da tabela:", tabela1.rows().data().toArray()); // Depuração
+            tabela1.column(0).search(equipeFilter ? equipeFilter : '', true, false).draw(); // Coluna 0 é B
+            tabela1.column(13).search(statusFilter ? statusFilter : '', true, false).draw(); // Coluna 13 é O
           }
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
@@ -239,7 +244,7 @@
               body: bodyPDF1,
               startY: 30,
               theme: 'striped',
-              styles: { fontSize: 7 }, // Ajustado para caber mais colunas
+              styles: { fontSize: 7 },
               headStyles: { fillColor: [41, 128, 185] }
             });
 
@@ -282,9 +287,11 @@
             }
           });
 
-          let tabela2 = $('#tabela2').DataTable();
+          let tabela2 = $('#tabela2').DataTable({
+            "pageLength": 10 // Adicionado para facilitar visualização
+          });
 
-          // Filtro por Equipe (coluna B, índice 1)
+          // Filtro por Equipe (coluna B, índice 1 no CSV, 0 na tabela exibida)
           let equipes2 = [...new Set(dados2.map(r => r[1]))].sort();
           let filtroEquipe2 = document.getElementById("filtroEquipe2");
           equipes2.forEach(eq => {
@@ -296,7 +303,7 @@
             }
           });
 
-          // Filtro por Status (coluna M, índice 12)
+          // Filtro por Status (coluna M, índice 12 no CSV, 11 na tabela exibida)
           let statuses2 = [...new Set(dados2.map(r => r[12]))].sort();
           let filtroStatus2 = document.getElementById("filtroStatus2");
           statuses2.forEach(status => {
@@ -319,7 +326,10 @@
           function applyFilters2() {
             let equipeFilter = filtroEquipe2.value;
             let statusFilter = filtroStatus2.value;
-            tabela2.column(1).search(equipeFilter).column(12).search(statusFilter).draw(); // Usa coluna 1 (B) para equipe
+            console.log("Filtro Tabela 2 - Equipe:", equipeFilter, "Status:", statusFilter);
+            console.log("Dados da tabela:", tabela2.rows().data().toArray()); // Depuração
+            tabela2.column(0).search(equipeFilter ? equipeFilter : '', true, false).draw(); // Coluna 0 é B
+            tabela2.column(11).search(statusFilter ? statusFilter : '', true, false).draw(); // Coluna 11 é M
           }
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
@@ -354,7 +364,7 @@
               body: bodyPDF2,
               startY: 30,
               theme: 'striped',
-              styles: { fontSize: 7 }, // Ajustado para caber mais colunas
+              styles: { fontSize: 7 },
               headStyles: { fillColor: [41, 128, 185] }
             });
 

@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Oswald, sans-serif;
       margin: 16px;
       font-size: 14px;
     }
@@ -52,10 +52,10 @@
       margin-right: 10px;
     }
     table {
-  width: 100%;
-  border: 1px solid white;
-  text-align: center; /* Centraliza todo o conteúdo da tabela */
-   }
+      width: 100%;
+      border: 1px solid white;
+      text-align: center;
+    }
     button {
       margin-left: 10px;
       padding: 8px 12px;
@@ -131,8 +131,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      const csvUrl1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
-      const csvUrl2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1899832726&single=true&output=csv";
+      const csvUrl1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv&t=" + new Date().getTime();
+      const csvUrl2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1899832726&single=true&output=csv&t=" + new Date().getTime();
 
       // Tabela 1
       if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
@@ -147,6 +147,12 @@
         complete: function(results) {
           let cabecalhoGlobal1 = results.data[4].slice(1, 16); // Colunas B a P
           let dados1 = results.data.slice(5);
+
+          // Normalizar a coluna de status (índice 14, coluna O) para remover acentos e espaços
+          dados1 = dados1.map(row => {
+            row[14] = row[14] ? row[14].trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() : '';
+            return row;
+          });
 
           let cabecalhoRow1 = document.getElementById("cabecalho1");
           cabecalhoGlobal1.forEach(col => {
@@ -170,7 +176,7 @@
           });
 
           let tabela1 = $('#tabela1').DataTable({
-            "pageLength": 10 // Adicionado para facilitar visualização
+            "pageLength": 10
           });
 
           // Filtro por Equipe (coluna B, índice 1 no CSV, 0 na tabela exibida)
@@ -208,10 +214,22 @@
           function applyFilters1() {
             let equipeFilter = filtroEquipe1.value;
             let statusFilter = filtroStatus1.value;
+
+            // Depuração: log dos filtros aplicados
             console.log("Filtro Tabela 1 - Equipe:", equipeFilter, "Status:", statusFilter);
-            console.log("Dados da tabela:", tabela1.rows().data().toArray()); // Depuração
-            tabela1.column(0).search(equipeFilter ? equipeFilter : '', true, false).draw(); // Coluna 0 é B
-            tabela1.column(13).search(statusFilter ? statusFilter : '', true, false).draw(); // Coluna 13 é O
+
+            // Aplica filtro na coluna de equipe (coluna 0, correspondente à B no CSV)
+            tabela1.column(0).search(equipeFilter ? '^' + equipeFilter + '$' : '', true, false).draw();
+
+            // Aplica filtro na coluna de status (coluna 13, correspondente à O no CSV)
+            if (statusFilter) {
+              tabela1.column(13).search('^' + statusFilter + '$', true, false).draw();
+            } else {
+              tabela1.column(13).search('', true, false).draw();
+            }
+
+            // Depuração: log dos dados filtrados
+            console.log("Dados filtrados Tabela 1:", tabela1.rows({ search: 'applied' }).data().toArray());
           }
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
@@ -268,6 +286,12 @@
           let cabecalhoGlobal2 = results.data[4].slice(1, 14); // Colunas B a N
           let dados2 = results.data.slice(5);
 
+          // Normalizar a coluna de status (índice 12, coluna M) para remover acentos e espaços
+          dados2 = dados2.map(row => {
+            row[12] = row[12] ? row[12].trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() : '';
+            return row;
+          });
+
           let cabecalhoRow2 = document.getElementById("cabecalho2");
           cabecalhoGlobal2.forEach(col => {
             let th = document.createElement("th");
@@ -290,7 +314,7 @@
           });
 
           let tabela2 = $('#tabela2').DataTable({
-            "pageLength": 10 // Adicionado para facilitar visualização
+            "pageLength": 10
           });
 
           // Filtro por Equipe (coluna B, índice 1 no CSV, 0 na tabela exibida)
@@ -328,10 +352,22 @@
           function applyFilters2() {
             let equipeFilter = filtroEquipe2.value;
             let statusFilter = filtroStatus2.value;
+
+            // Depuração: log dos filtros aplicados
             console.log("Filtro Tabela 2 - Equipe:", equipeFilter, "Status:", statusFilter);
-            console.log("Dados da tabela:", tabela2.rows().data().toArray()); // Depuração
-            tabela2.column(0).search(equipeFilter ? equipeFilter : '', true, false).draw(); // Coluna 0 é B
-            tabela2.column(11).search(statusFilter ? statusFilter : '', true, false).draw(); // Coluna 11 é M
+
+            // Aplica filtro na coluna de equipe (coluna 0, correspondente à B no CSV)
+            tabela2.column(0).search(equipeFilter ? '^' + equipeFilter + '$' : '', true, false).draw();
+
+            // Aplica filtro na coluna de status (coluna 11, correspondente à M no CSV)
+            if (statusFilter) {
+              tabela2.column(11).search('^' + statusFilter + '$', true, false).draw();
+            } else {
+              tabela2.column(11).search('', true, false).draw();
+            }
+
+            // Depuração: log dos dados filtrados
+            console.log("Dados filtrados Tabela 2:", tabela2.rows({ search: 'applied' }).data().toArray());
           }
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
@@ -383,7 +419,3 @@
   </script>
 </body>
 </html>
-
-
-
-

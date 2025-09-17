@@ -260,12 +260,12 @@
             ]);
 
             doc.autoTable({
-              head: [cabecalhoGlobal1],
-              body: bodyPDF1,
-              startY: 30,
-              theme: 'striped',
-              styles: { fontSize: 7 },
-              headStyles: { fillColor: [41, 128, 185] }
+             head: [cabecalhoGlobal1],
+             body: bodyPDF1,
+             startY: 30,
+             theme: 'striped',
+             styles: { fontSize: 7, halign: 'center' }, /* Centraliza todo o texto */
+             headStyles: { fillColor: [41, 128, 185], halign: 'center' } /* Centraliza cabeçalhos */
             });
 
             let filtroValue1 = filtroEquipe1.value || 'todas_equipes';
@@ -398,14 +398,13 @@
             ]);
 
             doc.autoTable({
-              head: [cabecalhoGlobal2],
-              body: bodyPDF2,
-              startY: 30,
-              theme: 'striped',
-              styles: { fontSize: 7 },
-              headStyles: { fillColor: [41, 128, 185] }
-            });
-
+             head: [cabecalhoGlobal2],
+             body: bodyPDF1,
+             startY: 30,
+             theme: 'striped',
+             styles: { fontSize: 7, halign: 'center' }, /* Centraliza todo o texto */
+             headStyles: { fillColor: [41, 128, 185], halign: 'center' } /* Centraliza cabeçalhos */
+           });
             let filtroValue2 = filtroEquipe2.value || 'todas_equipes';
             let statusValue2 = filtroStatus2.value || 'todos_status';
             doc.save(`desenvolvimento-infantil-vacinas-${filtroValue2}-${statusValue2}.pdf`);
@@ -419,4 +418,5 @@
   </script>
 </body>
 </html>
+
 

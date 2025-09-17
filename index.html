@@ -7,7 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-  <!-- Bibliotecas para PDF -->
+  <!-- Bibliotecas para PDF com fallback local -->
   <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://unpkg.com/jspdf-autotable@3.5.32/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
@@ -75,8 +75,8 @@
 <body>
   <h2>Desenvolvimento Infantil</h2>
   <div class="tab-buttons">
-    <button class="tab-button active" onclick="openTab('tab1')">Tabela 1</button>
-    <button class="tab-button" onclick="openTab('tab2')">Tabela 2</button>
+    <button class="tab-button active" onclick="openTab('tab1')">Desenvolvimento Infantil - exceto vacinas</button>
+    <button class="tab-button" onclick="openTab('tab2')">Desenvolvimento Infantil - vacinas</button>
   </div>
 
   <!-- Aba 1 -->
@@ -125,7 +125,7 @@
 
       // Tabela 1
       if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
-        document.getElementById('erroPdf').innerText = 'Erro: Bibliotecas básicas não carregaram.';
+        document.getElementById('erroPdf').innerText = 'Erro: Bibliotecas básicas não carregaram. Verifique o console.';
         document.getElementById('erroPdf').style.display = 'block';
         return;
       }
@@ -176,7 +176,7 @@
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou.';
+              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
               document.getElementById('erroPdf').style.display = 'block';
               return;
             }
@@ -187,20 +187,19 @@
               format: 'a4'
             });
 
-            doc.text("Desenvolvimento Infantil - Tabela 1", 14, 20);
+            doc.text("Desenvolvimento Infantil - exceto vacinas", 14, 20);
 
             let rows1 = tabela1.rows({ search: 'applied' }).data().toArray();
+            if (rows1.length === 0) {
+              document.getElementById('erroPdf').innerText = 'Erro: Nenhum dado para gerar o PDF. Aplique um filtro ou verifique os dados.';
+              document.getElementById('erroPdf').style.display = 'block';
+              return;
+            }
             let bodyPDF1 = rows1.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '',
               row[4] || '', row[5] || '', row[6] || '', row[7] || '',
               row[8] || '', row[9] || '', row[10] || '', row[11] || ''
             ]);
-
-            if (bodyPDF1.length === 0) {
-              document.getElementById('erroPdf').innerText = 'Erro: Nenhum dado para gerar o PDF.';
-              document.getElementById('erroPdf').style.display = 'block';
-              return;
-            }
 
             doc.autoTable({
               head: [cabecalhoGlobal1],
@@ -212,7 +211,7 @@
             });
 
             let filtroValue1 = filtro1.value || 'todas_equipes';
-            doc.save(`desenvolvimento-infantil-tabela1-${filtroValue1}.pdf`);
+            doc.save(`desenvolvimento-infantil-exceto-vacinas-${filtroValue1}.pdf`);
           });
         },
         error: function(err) {
@@ -268,7 +267,7 @@
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou.';
+              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
               document.getElementById('erroPdf2').style.display = 'block';
               return;
             }
@@ -279,20 +278,19 @@
               format: 'a4'
             });
 
-            doc.text("Desenvolvimento Infantil - Tabela 2", 14, 20);
+            doc.text("Desenvolvimento Infantil - vacinas", 14, 20);
 
             let rows2 = tabela2.rows({ search: 'applied' }).data().toArray();
+            if (rows2.length === 0) {
+              document.getElementById('erroPdf2').innerText = 'Erro: Nenhum dado para gerar o PDF. Aplique um filtro ou verifique os dados.';
+              document.getElementById('erroPdf2').style.display = 'block';
+              return;
+            }
             let bodyPDF2 = rows2.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '',
               row[4] || '', row[5] || '', row[6] || '', row[7] || '',
               row[8] || '', row[9] || '', row[10] || '', row[11] || '', row[12] || ''
             ]);
-
-            if (bodyPDF2.length === 0) {
-              document.getElementById('erroPdf2').innerText = 'Erro: Nenhum dado para gerar o PDF.';
-              document.getElementById('erroPdf2').style.display = 'block';
-              return;
-            }
 
             doc.autoTable({
               head: [cabecalhoGlobal2],
@@ -304,7 +302,7 @@
             });
 
             let filtroValue2 = filtro2.value || 'todas_equipes';
-            doc.save(`desenvolvimento-infantil-tabela2-${filtroValue2}.pdf`);
+            doc.save(`desenvolvimento-infantil-vacinas-${filtroValue2}.pdf`);
           });
         },
         error: function(err) {

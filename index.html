@@ -7,9 +7,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-  <!-- Bibliotecas para PDF (URLs estáveis) -->
-  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/jspdf-autotable@latest/dist/jspdf.plugin.autotable.min.js"></script>
+  <!-- Bibliotecas para PDF com fallback -->
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/jspdf-autotable@3.5.32/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,6 +38,11 @@
     button:hover {
       background-color: #0056b3;
     }
+    #erroPdf {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -47,6 +52,7 @@
     <option value="">Todas</option>
   </select>
   <button id="btnPdf">Gerar PDF</button>
+  <div id="erroPdf"></div>
   <table id="tabela" class="display" style="width:100%">
     <thead>
       <tr id="cabecalho"></tr>
@@ -56,15 +62,16 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Verifica se as bibliotecas carregaram
-      if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
-        console.error('Bibliotecas não carregaram. Verifique a conexão.');
-        return;
-      }
-
       const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJk3K_1DtxtxvBx5UuRIbsl_OGzNA9AMMx3TbacImInVTl759ziDlxBK0nlwZg1J_iKxjktwvI5FaH/pub?gid=1142482515&single=true&output=csv";
       let cabecalhoGlobal = [];
       let tabela;
+
+      // Verifica se as bibliotecas essenciais estão carregadas
+      if (typeof Papa === 'undefined' || typeof $ === 'undefined') {
+        document.getElementById('erroPdf').innerText = 'Erro: Bibliotecas básicas não carregaram.';
+        document.getElementById('erroPdf').style.display = 'block';
+        return;
+      }
 
       Papa.parse(csvUrl, {
         download: true,
@@ -110,14 +117,20 @@
             tabela.column(0).search(this.value).draw();
           });
 
-          // Evento para PDF
+          // Evento para gerar PDF em paisagem
           document.getElementById("btnPdf").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              alert('Biblioteca PDF não carregou. Verifique o console.');
+              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou. Verifique o console.';
+              document.getElementById('erroPdf').style.display = 'block';
               return;
             }
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({
+              orientation: 'landscape', // Define como paisagem
+              unit: 'mm',
+              format: 'a4'
+            });
+
             doc.text("Desenvolvimento Infantil", 14, 20);
 
             let rows = tabela.rows({ search: 'applied' }).data().toArray();
@@ -126,6 +139,12 @@
               row[4] || '', row[5] || '', row[6] || '', row[7] || '',
               row[8] || '', row[9] || '', row[10] || '', row[11] || ''
             ]);
+
+            if (bodyPDF.length === 0) {
+              document.getElementById('erroPdf').innerText = 'Erro: Nenhum dado para gerar o PDF. Aplique um filtro ou verifique os dados.';
+              document.getElementById('erroPdf').style.display = 'block';
+              return;
+            }
 
             doc.autoTable({
               head: [cabecalhoGlobal],
@@ -136,7 +155,7 @@
               headStyles: { fillColor: [41, 128, 185] }
             });
 
-            let filtroValue = filtro.value || 'todas_equipes';
+            let filtroValue = document.getElementById('filtroEquipe').value || 'todas_equipes';
             doc.save(`desenvolvimento-infantil-${filtroValue}.pdf`);
           });
         },

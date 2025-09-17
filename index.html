@@ -176,8 +176,9 @@
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique os arquivos.';
+              document.getElementById('erroPdf').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique se os arquivos jspdf.umd.min.js e jspdf.plugin.autotable.min.js estão na raiz do repositório.';
               document.getElementById('erroPdf').style.display = 'block';
+              console.error('jsPDF não encontrado. Caminhos:', document.querySelectorAll('script[src*="/jspdf"]'));
               return;
             }
             const { jsPDF } = window.jspdf;
@@ -267,8 +268,9 @@
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
             if (typeof window.jspdf === 'undefined') {
-              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique os arquivos.';
+              document.getElementById('erroPdf2').innerText = 'Erro: Biblioteca jsPDF não carregou localmente. Verifique se os arquivos jspdf.umd.min.js e jspdf.plugin.autotable.min.js estão na raiz do repositório.';
               document.getElementById('erroPdf2').style.display = 'block';
+              console.error('jsPDF não encontrado. Caminhos:', document.querySelectorAll('script[src*="/jspdf"]'));
               return;
             }
             const { jsPDF } = window.jspdf;

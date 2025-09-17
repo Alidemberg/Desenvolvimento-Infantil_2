@@ -143,7 +143,7 @@
         download: true,
         skipEmptyLines: true,
         complete: function(results) {
-          let cabecalhoGlobal1 = results.data[4].slice(0, 16); // Colunas A a P
+          let cabecalhoGlobal1 = results.data[4].slice(1, 16); // Colunas B a P
           let dados1 = results.data.slice(5);
 
           let cabecalhoRow1 = document.getElementById("cabecalho1");
@@ -155,13 +155,13 @@
 
           let tbody1 = document.querySelector("#tabela1 tbody");
           dados1.forEach(row => {
-            if (row.length > 15) { // Verifica se tem pelo menos 16 colunas (A a P)
+            if (row.length > 15) { // Verifica se tem pelo menos 16 colunas (A a P, usamos B a P)
               let tr = document.createElement("tr");
               tr.innerHTML = `
-                <td>${row[0] || ''}</td><td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td>
-                <td>${row[4] || ''}</td><td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td>
-                <td>${row[8] || ''}</td><td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td>
-                <td>${row[12] || ''}</td><td>${row[13] || ''}</td><td>${row[14] || ''}</td><td>${row[15] || ''}</td>
+                <td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td><td>${row[4] || ''}</td>
+                <td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td><td>${row[8] || ''}</td>
+                <td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td><td>${row[12] || ''}</td>
+                <td>${row[13] || ''}</td><td>${row[14] || ''}</td><td>${row[15] || ''}</td>
               `;
               tbody1.appendChild(tr);
             }
@@ -169,8 +169,8 @@
 
           let tabela1 = $('#tabela1').DataTable();
 
-          // Filtro por Equipe (coluna A, índice 0)
-          let equipes1 = [...new Set(dados1.map(r => r[0]))].sort();
+          // Filtro por Equipe (coluna B, índice 1)
+          let equipes1 = [...new Set(dados1.map(r => r[1]))].sort();
           let filtroEquipe1 = document.getElementById("filtroEquipe");
           equipes1.forEach(eq => {
             if (eq && eq.trim() !== "") {
@@ -204,7 +204,7 @@
           function applyFilters1() {
             let equipeFilter = filtroEquipe1.value;
             let statusFilter = filtroStatus1.value;
-            tabela1.column(0).search(equipeFilter).column(14).search(statusFilter).draw(); // Usa coluna 14 (O)
+            tabela1.column(1).search(equipeFilter).column(14).search(statusFilter).draw(); // Usa coluna 1 (B) para equipe
           }
 
           document.getElementById("btnPdf1").addEventListener("click", function() {
@@ -231,7 +231,7 @@
             let bodyPDF1 = rows1.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '', row[4] || '', row[5] || '',
               row[6] || '', row[7] || '', row[8] || '', row[9] || '', row[10] || '', row[11] || '',
-              row[12] || '', row[13] || '', row[14] || '', row[15] || ''
+              row[12] || '', row[13] || '', row[14] || ''
             ]);
 
             doc.autoTable({
@@ -258,7 +258,7 @@
         download: true,
         skipEmptyLines: true,
         complete: function(results) {
-          let cabecalhoGlobal2 = results.data[4].slice(0, 14); // Colunas A a N
+          let cabecalhoGlobal2 = results.data[4].slice(1, 14); // Colunas B a N
           let dados2 = results.data.slice(5);
 
           let cabecalhoRow2 = document.getElementById("cabecalho2");
@@ -270,13 +270,13 @@
 
           let tbody2 = document.querySelector("#tabela2 tbody");
           dados2.forEach(row => {
-            if (row.length > 13) { // Verifica se tem pelo menos 14 colunas (A a N)
+            if (row.length > 13) { // Verifica se tem pelo menos 14 colunas (A a N, usamos B a N)
               let tr = document.createElement("tr");
               tr.innerHTML = `
-                <td>${row[0] || ''}</td><td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td>
-                <td>${row[4] || ''}</td><td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td>
-                <td>${row[8] || ''}</td><td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td>
-                <td>${row[12] || ''}</td><td>${row[13] || ''}</td>
+                <td>${row[1] || ''}</td><td>${row[2] || ''}</td><td>${row[3] || ''}</td><td>${row[4] || ''}</td>
+                <td>${row[5] || ''}</td><td>${row[6] || ''}</td><td>${row[7] || ''}</td><td>${row[8] || ''}</td>
+                <td>${row[9] || ''}</td><td>${row[10] || ''}</td><td>${row[11] || ''}</td><td>${row[12] || ''}</td>
+                <td>${row[13] || ''}</td>
               `;
               tbody2.appendChild(tr);
             }
@@ -284,8 +284,8 @@
 
           let tabela2 = $('#tabela2').DataTable();
 
-          // Filtro por Equipe (coluna A, índice 0)
-          let equipes2 = [...new Set(dados2.map(r => r[0]))].sort();
+          // Filtro por Equipe (coluna B, índice 1)
+          let equipes2 = [...new Set(dados2.map(r => r[1]))].sort();
           let filtroEquipe2 = document.getElementById("filtroEquipe2");
           equipes2.forEach(eq => {
             if (eq && eq.trim() !== "") {
@@ -319,7 +319,7 @@
           function applyFilters2() {
             let equipeFilter = filtroEquipe2.value;
             let statusFilter = filtroStatus2.value;
-            tabela2.column(0).search(equipeFilter).column(12).search(statusFilter).draw(); // Usa coluna 12 (M)
+            tabela2.column(1).search(equipeFilter).column(12).search(statusFilter).draw(); // Usa coluna 1 (B) para equipe
           }
 
           document.getElementById("btnPdf2").addEventListener("click", function() {
@@ -346,7 +346,7 @@
             let bodyPDF2 = rows2.map(row => [
               row[0] || '', row[1] || '', row[2] || '', row[3] || '', row[4] || '', row[5] || '',
               row[6] || '', row[7] || '', row[8] || '', row[9] || '', row[10] || '', row[11] || '',
-              row[12] || '', row[13] || ''
+              row[12] || ''
             ]);
 
             doc.autoTable({
